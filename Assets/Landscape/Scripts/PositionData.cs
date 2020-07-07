@@ -9,12 +9,6 @@ namespace QuiteSensible
         public Vector3 v1, v2, v3;
     }
 
-    public class Occupant
-    {
-        public enum OType { Player, NPC, Object, Reserved };
-        public OType type;
-    }
-
     /// <summary>
     /// This order and naming makes it easier to follow
     /// when we're converting landing data to a quad
@@ -31,7 +25,7 @@ namespace QuiteSensible
         |        |
         |________P2
         P0       P3
-
+        
         ***********************************/
 
         public int ixBottomLeft, ixTopLeft, ixTopRight, ixBottomRight;
@@ -53,13 +47,11 @@ namespace QuiteSensible
     /// </summary>
     public class PositionData
     {
+        public enum OccupantType { None, Player, NPC, Object, Reserved };
+
         public Vector3 centrePos;
-        public Vector3 globalCentrePos;
         public LandingQuad landingQuad;
-        public Occupant occupant;
-        public Vector3 obstructionLocation;
-        public bool obstructed;
-        public LandingQuad obstructionQuad;
+        public OccupantType occupant = OccupantType.None;
     }
 
 }

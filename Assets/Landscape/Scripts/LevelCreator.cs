@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using UnityEngine.UIElements;
 using ICSharpCode.NRefactory.Ast;
+using UnityEngine.PlayerLoop;
 
 namespace QuiteSensible
 {
@@ -36,25 +37,22 @@ namespace QuiteSensible
         private int triangleHitIndex = -1;
         private Color32[] colorArray;
         private Color32[] colorBuffer;
-        private int highestPointPanelIndex = 0, lowestPointPanelIndex = System.Int32.MaxValue;
+        private int highestPointPanelIndex, lowestPointPanelIndex;
         private bool ready;
-        private bool destHeadPosShowing;
-        private Vector3 destHeadPos;
 
         private void Start()
         {
-            if (!landingSquare)
-            {
-                landingSquare = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            }
+            highestPointPanelIndex = 0;
+            lowestPointPanelIndex = System.Int32.MaxValue;
+
 #if UNITY_EDITOR
             if (autoCreate)
                 CreateLandscapeMesh();
 #endif
         }
 
-        public int HighestPanel => highestPointPanelIndex;
-        public int LowestPanel => lowestPointPanelIndex;
+        public int HighestPanel => LandingQuad.StartTri(highestPointPanelIndex);
+        public int LowestPanel => LandingQuad.StartTri(lowestPointPanelIndex);
 
         /// <summary>
         /// 
@@ -64,134 +62,110 @@ namespace QuiteSensible
         /// <param name="distance"></param>
         /// <param name="layer"></param>
         /// <param name="lookForObstruction">If we're about to move to a valid destination, check if there are any obstructions</param>
-        public PositionData Scan(Vector3 startPoint, Vector3 direction, float distance, float spherecastRadius, bool lookForObstruction = false)
+        public PositionData Scan(Vector3 startPoint, Vector3 direction, float distance)
         {
             if (!ready)
                 return null;
 
-            //bool gotHit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, distance, raycastLayer);
+            int newHitIndex = -1;
+            PositionData newPosition = null;
 
             bool gotHit = Physics.Raycast(startPoint, direction, out RaycastHit hit, distance, ourLayer);
 
-            if (gotHit)
+            if (gotHit) // New hit
             {
-                int hitObstructionTriangleIndex = -1;
-                Vector3 hitObstructionLocation = Vector3.zero;
-                bool possibleObstruction = false;
-
-                int tIndex = LandingQuad.StartTri(hit.triangleIndex);
-                PositionData pd = FindPositionData(tIndex);
-                if (pd != null)
+                newPosition = FindPositionData(hit.triangleIndex);
+                if (newPosition != null)
                 {
-                    triangleHitIndex = tIndex;
+                    // It's a valid landing spot.
+                    // Check if it's not already occupied.
 
-                    if (lookForObstruction)
-                    {
-                        Vector3 destHeadPos = pd.globalCentrePos;
-                        destHeadPos.y += 2f; // test
-                        Vector3 obstructionDirection = destHeadPos - startPoint;
-                        possibleObstruction = Physics.SphereCast(startPoint, spherecastRadius, obstructionDirection,
-                            out RaycastHit hitObstruction, distance);
-                        //possibleObstruction = Physics.BoxCast(startPoint, boxCastExtents, direction,
-                        //    out RaycastHit hitObstruction, Quaternion.identity, distance);
-
-                        if (hitObstruction.distance >= hit.distance)
-                            possibleObstruction = false;
-                        if (possibleObstruction)
-                        {
-                            hitObstructionTriangleIndex = hitObstruction.triangleIndex;
-                            hitObstructionLocation = hitObstruction.point;
-                            
-                            Debug.DrawLine(startPoint, destHeadPos, Color.white, 2f);
-                            
-                        }
-                    }
-
-                    if (possibleObstruction)
-                    {
-                        destHeadPosShowing = true;
-
-                        int oIndex = LandingQuad.StartTri(hitObstructionTriangleIndex);
-                        if (oIndex != tIndex && oIndex >= 0)
-                        {
-                            Debug.LogFormat("Dest index: {0}, obstruction index: {1}", tIndex, oIndex);
-
-                            pd.obstructed = true;
-                            pd.obstructionLocation = hitObstructionLocation;
-                            HighlightTri(oIndex);
-                        }
-                    }
-                    else
-                        destHeadPosShowing = false;
-                    SelectQuad(hit.collider.transform, pd);
-                    return pd;
-                }
-                else
-                {
-                    if (triangleHitIndex >= 0)
-                        DeselectQuad();
-
-                    triangleHitIndex = -1;
+                    if (newPosition.occupant == PositionData.OccupantType.None)
+                        newHitIndex = newPosition.landingQuad.startTriangleIndex;
                 }
             }
-            else
-            {
-                if (triangleHitIndex >= 0)
-                {
-                    Debug.Log("Clearing previous selection");
 
-                    // Notify no longer pointing at valid space
-                    DeselectQuad();
-                    triangleHitIndex = -1;
+            if (newHitIndex != triangleHitIndex)
+            {
+                ClearCurrentTarget();
+
+                if (newHitIndex >= 0)
+                    HighlightQuad(newPosition);
+
+                triangleHitIndex = newHitIndex;
+                UpdateColors();
+            }
+
+            return null;
+        }
+
+        private void HighlightQuad(PositionData pd)
+        {           
+            colorBuffer[pd.landingQuad.ixBottomLeft] = highlightColor;
+            colorBuffer[pd.landingQuad.ixTopLeft] = highlightColor;
+            colorBuffer[pd.landingQuad.ixTopRight] = highlightColor;
+            colorBuffer[pd.landingQuad.ixBottomRight] = highlightColor;            
+        }
+
+        private void UpdateColors()
+        {
+            mesh.colors32 = colorBuffer;
+        }
+
+        private void ResetColorBuffer()
+        {
+            Array.Copy(colorArray, colorBuffer, vertices.Length);
+        }
+
+        public PositionData SetCurrentTarget()
+        {
+            if (triangleHitIndex >= 0)
+            {
+                PositionData current = FindPositionData(triangleHitIndex);
+                if (current != null)
+                {
+                    current.occupant = PositionData.OccupantType.Player;
+                    return current;
                 }
             }
             return null;
         }
 
-        private void SelectQuad(Transform hitTransform, PositionData pd)
+        public void ClearCurrentTarget()
         {
-            landingSquare.SetActive(true);
+            if (triangleHitIndex >= 0)
+            {
+                ResetColorBuffer();
 
-            pd.globalCentrePos = hitTransform.TransformPoint(pd.centrePos);
-
-            landingSquare.transform.position = pd.globalCentrePos;
-
-#if HIGHLIGHT_LANDING_VERTICES
-            colorBuffer[pd.landingQuad.ixBottomLeft] = highlightColor;
-            colorBuffer[pd.landingQuad.ixTopLeft] = highlightColor;
-            colorBuffer[pd.landingQuad.ixTopRight] = highlightColor;
-            colorBuffer[pd.landingQuad.ixBottomRight] = highlightColor;
-
-            mesh.colors32 = colorBuffer;
-#endif
-
-        }
-
-        private void DeselectQuad()
-        {
-            landingSquare.SetActive(false);
-            Array.Copy(colorArray, colorBuffer, vertices.Length);
-
-            mesh.colors32 = colorBuffer;
-        }
-
-        private void HighlightTri(int triNumber)
-        {
-            int firstTriVertex = triNumber * 3;
-
-            colorBuffer[mesh.triangles[firstTriVertex]] = highlightColor;
-            colorBuffer[mesh.triangles[firstTriVertex] + 1] = highlightColor;
-            colorBuffer[mesh.triangles[firstTriVertex] + 2] = highlightColor;
-
-            mesh.colors32 = colorBuffer;
+                PositionData prev = FindPositionData(triangleHitIndex);
+                if (prev != null)
+                    prev.occupant = PositionData.OccupantType.None;
+            }
         }
 
         public PositionData FindPositionData(int triangleIndex)
         {
-            if (positionGrid.ContainsKey(triangleIndex))
-                return positionGrid[triangleIndex];
+            int tIndex = LandingQuad.StartTri(triangleIndex);
+            if (positionGrid.ContainsKey(tIndex))
+            {
+                Debug.Assert(positionGrid[tIndex].landingQuad.startTriangleIndex == tIndex);
+
+                return positionGrid[tIndex];
+            }
             else
                 return null;
+        }
+
+        public bool SetObjectAt(Transform thing, PositionData.OccupantType ot, int index)
+        {
+            PositionData pd = FindPositionData(index);
+            if (pd != null)
+            {
+                thing.transform.position = transform.TransformPoint(pd.centrePos);
+                pd.occupant = ot;
+                return true;
+            }
+            return false;
         }
 
         // Create the mesh and position data. Does not
@@ -297,7 +271,6 @@ namespace QuiteSensible
             timer = Time.realtimeSinceStartup;
 
             float highestPoint = 0.0f, lowestPoint = landscapeHeight;
-            int i = 0;
             float yRange = landscapeHeight * .25f;
 
             for (int z = 0; z < zPanels; z++)
@@ -343,12 +316,12 @@ namespace QuiteSensible
                     if (y > highestPoint)
                     {
                         highestPoint = y;
-                        highestPointPanelIndex = i;
+                        highestPointPanelIndex = quad.startTriangleIndex;
                     }
                     if (y < lowestPoint)
                     {
                         lowestPoint = y;
-                        lowestPointPanelIndex = i;
+                        lowestPointPanelIndex = quad.startTriangleIndex;
                     }
                 }
 
@@ -357,10 +330,14 @@ namespace QuiteSensible
             Debug.Log("Elapsed after adding Panels: " + (Time.realtimeSinceStartup - timer));
             timer = Time.realtimeSinceStartup;
 
+            Debug.LogFormat("Highest index: {0} at {1}, Lowest index: {2} at {3}",
+                highestPointPanelIndex, highestPoint, lowestPointPanelIndex, lowestPoint);
+
             Array.Copy(colorArray, colorBuffer, vertices.Length);
 
+            //mesh.uv = uv; // Leave out if we're doing vertex colours
+
             mesh.vertices = vertices;
-            //mesh.uv = uv;
             mesh.tangents = tangents;
             mesh.triangles = triangles;
             mesh.colors32 = colorBuffer;
@@ -369,11 +346,6 @@ namespace QuiteSensible
             mesh.RecalculateBounds();
 
             Debug.Log("Elapsed after adding landscape mesh: " + (Time.realtimeSinceStartup - timer));
-            timer = Time.realtimeSinceStartup;
-
-            Debug.Log("Highest, lowest: " + highestPoint + ", " + lowestPoint);
-
-            Debug.Log("Elapsed after adding energy objects: " + (Time.realtimeSinceStartup - timer));
             timer = Time.realtimeSinceStartup;
 
             var renderer = GetComponent<MeshRenderer>();
