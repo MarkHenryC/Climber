@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 namespace QuiteSensible
 {
     /// <summary>
     /// For creating smooth path from 
-    /// a listof 3D points using 
+    /// a list of 3D points and handles using 
     /// Chaikins algorithm
     /// </summary>
     public class ChaikinsPoints
