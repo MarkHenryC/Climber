@@ -1,7 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
-using QuiteSensible;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -25,7 +23,7 @@ namespace Tests
             // Use yield to skip a frame.
 
             GameObject landscape = MonoBehaviour.Instantiate(Resources.Load<GameObject>("LandscapePrefab"));
-            LevelCreator lc = landscape.GetComponent<LevelCreator>();
+            QuiteSensible.LevelCreator lc = landscape.GetComponent<QuiteSensible.LevelCreator>();
             lc.CreateLandscapeMesh();
 
             yield return null;

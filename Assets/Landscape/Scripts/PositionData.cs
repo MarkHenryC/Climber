@@ -45,7 +45,7 @@ namespace QuiteSensible
     /// </summary>
     public class PositionData
     {
-        public enum OccupantType { None, Player, NPC, Object, Reserved };
+        public enum OccupantType { None, Player, NPC, Object, Boss, Reserved };
 
         public Vector3 centrePos;
         public LandingQuad landingQuad;

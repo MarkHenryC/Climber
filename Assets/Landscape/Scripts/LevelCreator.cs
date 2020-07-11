@@ -13,12 +13,10 @@ namespace QuiteSensible
         public bool autoCreate = true;
         public int landscapeHeight = 5;
         public Color defaultColor = Color.blue;
-        public Color highlightColor = Color.red;
+        public Color highlightColor = Color.white;
         public Gradient gradient;
         public bool useGradient;
-        public GameObject landingSquare;
         public LayerMask ourLayer;
-        public Vector3 boxCastExtents;
         [Tooltip("How the tiles spread out from the centre.")]
         public AnimationCurve distanceCurve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 1f)); // default linear       
 
@@ -73,10 +71,7 @@ namespace QuiteSensible
                 if (newPosition != null)
                 {
                     // It's a valid landing spot.
-                    // Check if it's not already occupied.
-
-                    if (newPosition.occupant == PositionData.OccupantType.None)
-                        newHitIndex = newPosition.landingQuad.startTriangleIndex;
+                    newHitIndex = newPosition.landingQuad.startTriangleIndex;
                 }
             }
 
@@ -91,7 +86,7 @@ namespace QuiteSensible
                 UpdateColors();
             }
 
-            return null;
+            return newPosition;
         }
 
         private void HighlightQuad(PositionData pd)
@@ -112,14 +107,27 @@ namespace QuiteSensible
             Array.Copy(colorArray, colorBuffer, vertices.Length);
         }
 
-        public PositionData SetCurrentTarget()
+        public PositionData GetCurrentTarget()
+        {
+            if (triangleHitIndex >= 0)
+                return FindPositionData(triangleHitIndex);
+
+            return null;
+        }
+
+        public void PlaceOccupant(PositionData pd, PositionData.OccupantType ot)
+        {
+            pd.occupant = ot;
+        }
+
+        public PositionData SetPlayerAt()
         {
             if (triangleHitIndex >= 0)
             {
                 PositionData current = FindPositionData(triangleHitIndex);
                 if (current != null)
                 {
-                    current.occupant = PositionData.OccupantType.Player;
+                    PlaceOccupant(current, PositionData.OccupantType.Player);
                     return current;
                 }
             }
@@ -243,9 +251,6 @@ namespace QuiteSensible
                 }
             }
 
-            Debug.Log("Elapsed after panel creation: " + (Time.realtimeSinceStartup - timer));
-            timer = Time.realtimeSinceStartup;
-
             Debug.Log("Elapsed after adding vertices: " + (Time.realtimeSinceStartup - timer));
             timer = Time.realtimeSinceStartup;
 
@@ -267,6 +272,14 @@ namespace QuiteSensible
 
             float highestPoint = 0.0f, lowestPoint = landscapeHeight;
             float yRange = landscapeHeight * .25f;
+
+            // The virtual quads cover all vertices except zero, as there's
+            // no adjacent vertex to take colour from, Same with last vertex
+            // if it's an odd size, so add edge colour manually.
+            Color edgeCol = useGradient ? gradient.Evaluate(0f) : defaultColor;
+            colorArray[0] = edgeCol;
+            if (xPanels % 2 != 0)
+                colorArray[colorArray.Length - 1] = edgeCol;
 
             for (int z = 0; z < zPanels; z++)
             {
@@ -293,9 +306,7 @@ namespace QuiteSensible
                     vertices[quad.ixTopRight].y = y;
                     vertices[quad.ixBottomRight].y = y;
 
-                    Color col = defaultColor;
-                    if (useGradient)
-                        col = gradient.Evaluate(closest);
+                    Color col = useGradient ? gradient.Evaluate(closest) : defaultColor;
 
                     colorArray[quad.ixBottomLeft] = col;
                     colorArray[quad.ixTopLeft] = col;
@@ -322,7 +333,7 @@ namespace QuiteSensible
 
             }
 
-            Debug.Log("Elapsed after adding Panels: " + (Time.realtimeSinceStartup - timer));
+            Debug.Log("Elapsed after calculating landing quads: " + (Time.realtimeSinceStartup - timer));
             timer = Time.realtimeSinceStartup;
 
             Debug.LogFormat("Highest index: {0} at {1}, Lowest index: {2} at {3}",
