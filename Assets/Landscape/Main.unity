@@ -325,7 +325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd8468923b03e6d41abbf24119bd4288, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeImage: {fileID: 0}
+  fadeImage: {fileID: 547470452}
   imageColor: {r: 0, g: 0, b: 0, a: 0}
   fadeTime: 1
   test: 0

@@ -46,6 +46,9 @@ namespace QuiteSensible
             gameData.ReturnObjects();
 
             levelCreator.CreateLandscapeMesh();
+
+            Debug.LogFormat("Boss panel index is {0}", levelCreator.HighestPanel);
+
             levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
             levelCreator.SetObjectAt(boss.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
 
@@ -69,6 +72,8 @@ namespace QuiteSensible
                 switch (pd.occupant)
                 {
                     case PositionData.OccupantType.None:
+                        Debug.LogFormat("Hit empty panel {0}", pd.landingQuad.startTriangleIndex);
+
                         if (currentTravelRoutine != null)
                             StopCoroutine(currentTravelRoutine);
 
@@ -80,6 +85,7 @@ namespace QuiteSensible
 
                         break;
                     case PositionData.OccupantType.Boss:
+                        Debug.LogFormat("Hit boss panel");
                         gameData.WonGame();
                         StartCoroutine(WinGame());
                         break;
@@ -109,11 +115,11 @@ namespace QuiteSensible
             currentTravelRoutine = null;
         }
 
-        private IEnumerator WinGame(bool won = true)
+        private IEnumerator WinGame()
         {
-            float yInc = (won ? -.1f : .1f);
+            float yInc = .1f;
             Vector3 pos = boss.transform.position;
-            float seconds = 2f;
+            float seconds = 5f;
             var w = new WaitForEndOfFrame();
 
             while (seconds > 0f)

@@ -212,6 +212,8 @@ namespace QuiteSensible
         // storing all viable positions (level quads)
         public void CreateLandscapeMesh()
         {
+            positionGrid.Clear();
+
             timer = Time.realtimeSinceStartup;
             Debug.Log("Starting timer in CreateLandscapeMesh");
 
