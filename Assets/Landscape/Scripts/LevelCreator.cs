@@ -145,7 +145,10 @@ namespace QuiteSensible
 
                 PositionData prev = FindPositionData(triangleHitIndex);
                 if (prev != null)
-                    prev.occupant = PositionData.OccupantType.None;
+                {
+                    if (prev.occupant == PositionData.OccupantType.Player)
+                        prev.occupant = PositionData.OccupantType.None;
+                }
             }
         }
 
@@ -162,32 +165,16 @@ namespace QuiteSensible
                 return null;
         }
 
-        public PositionData FindEmptyPosition(int prob = 5)
-        {
-            int ix = 0;
-
-            foreach (var kv in positionGrid)
-            {
-                if (ix++ % prob == 0)
-                {
-                    if (kv.Value.occupant == PositionData.OccupantType.None)
-                        return kv.Value;
-                }
-            }
-            return null;
-       
-        }
-
-        public bool SetObjectAt(Transform thing, PositionData.OccupantType ot, int index)
+        public PositionData SetObjectAt(Transform thing, PositionData.OccupantType ot, int index)
         {
             PositionData pd = FindPositionData(index);
             if (pd != null)
             {
                 thing.transform.position = transform.TransformPoint(pd.centrePos);
                 pd.occupant = ot;
-                return true;
+                return pd;
             }
-            return false;
+            return null;
         }
 
         public bool CreateObjectAt(GameObject template, PositionData.OccupantType ot, int index)

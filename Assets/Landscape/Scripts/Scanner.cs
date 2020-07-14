@@ -50,9 +50,6 @@ namespace QuiteSensible
                 if (Physics.BoxCast(transform.position, scanHalfExtents, currentDirection,
                     out RaycastHit hit, Quaternion.identity, scanDistance, targetMask))
                 {
-                    if (!haveTarget)
-                        Debug.Log("Hit target");
-
                     gameData.TakePlayerHealth(Time.deltaTime, damageStrength);
 
                     haveTarget = true;
@@ -60,7 +57,6 @@ namespace QuiteSensible
                 else if (haveTarget)
                 {
                     haveTarget = false;
-                    Debug.Log("No target");
                 }
 
                 if (!haveTarget)

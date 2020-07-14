@@ -49,8 +49,10 @@ namespace QuiteSensible
 
             Debug.LogFormat("Boss panel index is {0}", levelCreator.HighestPanel);
 
-            levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
-            levelCreator.SetObjectAt(boss.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
+            PositionData pdPlayer = levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
+            PositionData pdBoss = levelCreator.SetObjectAt(boss.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
+
+            Debug.LogFormat("Player at index {0}, Boss at {1}", pdPlayer.landingQuad.startTriangleIndex, pdBoss.landingQuad.startTriangleIndex);
 
             int[] emptyIndices = levelCreator.GetEmptyPositions();
             Shuffle(emptyIndices);

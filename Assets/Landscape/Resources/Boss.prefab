@@ -213,6 +213,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   gameData: {fileID: 11400000, guid: 01b4ada5d9d627144bc4b67c4f1d4e65, type: 2}
-  damageStrength: 10
+  damageStrength: 15
   speedVariance: 0
   distanceVariance: 0
