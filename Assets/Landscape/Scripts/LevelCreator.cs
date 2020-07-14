@@ -17,6 +17,7 @@ namespace QuiteSensible
         public Gradient gradient;
         public bool useGradient;
         public LayerMask ourLayer;
+        public GameData gameData;
         [Tooltip("How the tiles spread out from the centre.")]
         public AnimationCurve distanceCurve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 1f)); // default linear       
 
@@ -30,6 +31,8 @@ namespace QuiteSensible
         private int triangleHitIndex = -1;
         private Color32[] colorArray;
         private Color32[] colorBuffer;
+        private int[] positionIndices;
+
         private int highestPointPanelIndex, lowestPointPanelIndex;
         private bool ready;
 
@@ -159,6 +162,22 @@ namespace QuiteSensible
                 return null;
         }
 
+        public PositionData FindEmptyPosition(int prob = 5)
+        {
+            int ix = 0;
+
+            foreach (var kv in positionGrid)
+            {
+                if (ix++ % prob == 0)
+                {
+                    if (kv.Value.occupant == PositionData.OccupantType.None)
+                        return kv.Value;
+                }
+            }
+            return null;
+       
+        }
+
         public bool SetObjectAt(Transform thing, PositionData.OccupantType ot, int index)
         {
             PositionData pd = FindPositionData(index);
@@ -169,6 +188,20 @@ namespace QuiteSensible
                 return true;
             }
             return false;
+        }
+
+        public bool CreateObjectAt(GameObject template, PositionData.OccupantType ot, int index)
+        {
+            PositionData pd = FindPositionData(index);
+            if (pd != null)
+            {
+                GameObject go = gameData.GetObject(template);
+                go.transform.position = transform.TransformPoint(pd.centrePos);
+                pd.occupant = ot;
+                return true;
+            }
+            return false;
+
         }
 
         // Create the mesh and position data. Does not
@@ -361,7 +394,30 @@ namespace QuiteSensible
             if (collider)
                 collider.sharedMesh = mesh;
 
+            positionIndices = new int[positionGrid.Count];
+            int pix = 0;
+            foreach (var kv in positionGrid)
+                positionIndices[pix++] = kv.Key;
+
             ready = true;
+        }
+
+        public int[] GetEmptyPositions()
+        {
+            List<int> indices = new List<int>(positionIndices);
+            for (int i = 0; i < positionIndices.Length; i++)
+            {
+                PositionData pd = FindPositionData(positionIndices[i]);
+                if (pd != null)
+                {
+                    if (pd.occupant == PositionData.OccupantType.None)
+                        indices.Add(i);
+                }
+                else
+                    Debug.LogFormat("No data at index {0}", i);
+            }
+
+            return indices.ToArray();
         }
 
         public static float NormalizedDistanceFromMid(float val, float max)

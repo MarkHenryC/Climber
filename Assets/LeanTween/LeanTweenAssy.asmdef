@@ -1,9 +1,11 @@
 {
-    "name": "Landscape",
-    "references": [
-        "GUID:08fa51805f953cd41af86492044cd801"
+    "name": "LeanTweenAssy",
+    "references": [],
+    "includePlatforms": [
+        "Android",
+        "Editor",
+        "WindowsStandalone64"
     ],
-    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

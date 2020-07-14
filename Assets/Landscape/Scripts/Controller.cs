@@ -10,8 +10,12 @@ namespace QuiteSensible
         public Transform player;
         public float moveSpeed = 3f;
         public float rayCastDistance = 10f;
-        public Transform sphereMarker;
+        public GameObject boss;
         public float curveHeight = 1f;
+        public GameObject templateNPC;
+        public GameData gameData;
+        public int npcProbability;
+        public Fader fader;
 
         private Coroutine currentTravelRoutine;
         private Camera cam;
@@ -24,19 +28,35 @@ namespace QuiteSensible
             curve = new ChaikinsPoints();
             camController.ButtonUp = HandleTrigger;
 
-            CreateLandscape();
+            gameData.StartGameAction = CreateLandscape;
+            gameData.PlayerDeathNotification = LoseGame;
+            gameData.StartGame();
         }
 
         void Update()
         {
-            positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, rayCastDistance);
+            if (gameData.Playing)
+                positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, rayCastDistance);
         }
 
         private void CreateLandscape()
         {
+            fader.FadeIn();
+
+            gameData.ReturnObjects();
+
             levelCreator.CreateLandscapeMesh();
             levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
-            levelCreator.SetObjectAt(sphereMarker.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
+            levelCreator.SetObjectAt(boss.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
+
+            int[] emptyIndices = levelCreator.GetEmptyPositions();
+            Shuffle(emptyIndices);
+
+            for (int i = 0; i< emptyIndices.Length; i++)
+            {
+                if (i % npcProbability == 0)
+                    levelCreator.CreateObjectAt(templateNPC, PositionData.OccupantType.NPC, emptyIndices[i]);
+            }
         }
 
         private void HandleTrigger()
@@ -60,7 +80,8 @@ namespace QuiteSensible
 
                         break;
                     case PositionData.OccupantType.Boss:
-
+                        gameData.WonGame();
+                        StartCoroutine(WinGame());
                         break;
                 }
             }
@@ -86,6 +107,45 @@ namespace QuiteSensible
             }
 
             currentTravelRoutine = null;
+        }
+
+        private IEnumerator WinGame(bool won = true)
+        {
+            float yInc = (won ? -.1f : .1f);
+            Vector3 pos = boss.transform.position;
+            float seconds = 2f;
+            var w = new WaitForEndOfFrame();
+
+            while (seconds > 0f)
+            {
+                pos.y += yInc;
+                boss.transform.position = pos;
+                seconds -= Time.deltaTime;
+                yield return w;
+            }
+
+            gameData.StartGame();
+        }
+
+        private void LoseGame()
+        {
+            fader.FadeOut(() => { gameData.StartGame(); });
+        }
+
+        private void PlayScan()
+        {
+            positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, rayCastDistance);
+        }
+
+        private void Shuffle(int[] ar)
+        {
+            for (int i = 0; i < ar.Length; i++)
+            {
+                int tempVal = ar[i];
+                int randomIx = Random.Range(0, ar.Length);
+                ar[i] = ar[randomIx];
+                ar[randomIx] = tempVal;
+            }
         }
     }
 }
