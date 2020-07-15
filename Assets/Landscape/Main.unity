@@ -1243,7 +1243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 7162512541087623913}
-  yawAngleIncrement: 15
+  yawAngleIncrement: 30
   pitchAngleIncrement: 15
   pitchMax: 45
   pitchMin: -45

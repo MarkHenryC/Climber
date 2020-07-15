@@ -27,6 +27,23 @@ PrefabInstance:
       propertyPath: damageStrength
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 742670468, guid: 02d293a3a5138d944b7ad932a7f09ff0, type: 3}
+      propertyPath: scanGuide
+      value: 
+      objectReference: {fileID: 6059508305775368750}
+    - target: {fileID: 742670468, guid: 02d293a3a5138d944b7ad932a7f09ff0, type: 3}
+      propertyPath: uvXAnim
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 742670469, guid: 02d293a3a5138d944b7ad932a7f09ff0, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2404968232651412006, guid: 02d293a3a5138d944b7ad932a7f09ff0,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 59e5ad6c56364f94781ffb8f371f35e7, type: 2}
     - target: {fileID: 3272919463473202966, guid: 02d293a3a5138d944b7ad932a7f09ff0,
         type: 3}
       propertyPath: m_Name
@@ -92,5 +109,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8415619106794535987, guid: 02d293a3a5138d944b7ad932a7f09ff0,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 02d293a3a5138d944b7ad932a7f09ff0, type: 3}
+--- !u!4 &6059508305775368750 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8415619106794535987, guid: 02d293a3a5138d944b7ad932a7f09ff0,
+    type: 3}
+  m_PrefabInstance: {fileID: 2368324193830790685}
+  m_PrefabAsset: {fileID: 0}

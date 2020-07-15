@@ -120,6 +120,8 @@ namespace QuiteSensible
 
         public void PlaceOccupant(PositionData pd, PositionData.OccupantType ot)
         {
+            Debug.LogFormat("Placing occupant {0} at index {1}", ot, pd.landingQuad.startTriangleIndex);
+
             pd.occupant = ot;
         }
 
@@ -147,7 +149,11 @@ namespace QuiteSensible
                 if (prev != null)
                 {
                     if (prev.occupant == PositionData.OccupantType.Player)
+                    {
+                        Debug.LogFormat("Clearing Player occupancyat index {0}", prev.landingQuad.startTriangleIndex);
+
                         prev.occupant = PositionData.OccupantType.None;
+                    }
                 }
             }
         }
@@ -170,6 +176,8 @@ namespace QuiteSensible
             PositionData pd = FindPositionData(index);
             if (pd != null)
             {
+                Debug.LogFormat("Placing occupant {0} at index {1}", ot, index);
+
                 thing.transform.position = transform.TransformPoint(pd.centrePos);
                 pd.occupant = ot;
                 return pd;
@@ -182,6 +190,13 @@ namespace QuiteSensible
             PositionData pd = FindPositionData(index);
             if (pd != null)
             {
+                Debug.LogFormat("Creating occupant {0} at index {1}", ot, index);
+
+                if (pd.occupant != PositionData.OccupantType.None)
+                {
+                    Debug.LogWarning("Position NOT empty!");
+                    return false;
+                }
                 GameObject go = gameData.GetObject(template);
                 go.transform.position = transform.TransformPoint(pd.centrePos);
                 pd.occupant = ot;
@@ -400,7 +415,10 @@ namespace QuiteSensible
                 if (pd != null)
                 {
                     if (pd.occupant == PositionData.OccupantType.None)
-                        indices.Add(i);
+                        indices.Add(positionIndices[i]);
+                    else
+                        Debug.LogFormat("Skipped index {0} as it's not empty: contains {1}",
+                            pd.landingQuad.startTriangleIndex, pd.occupant);
                 }
                 else
                     Debug.LogFormat("No data at index {0}", i);

@@ -30,12 +30,20 @@ namespace QuiteSensible
 
         public void FadeIn(System.Action a = null)
         {
-            LeanTween.value(gameObject, TweenColor, opaqueColor, clearColor, fadeTime).setOnComplete(a);
+            // Don't fade in if already clear
+            if (fadeImage.color == clearColor)            
+                a?.Invoke();
+            else
+                LeanTween.value(gameObject, TweenColor, opaqueColor, clearColor, fadeTime).setOnComplete(a);
         }
 
         public void FadeOut(System.Action a = null)
         {
-            LeanTween.value(gameObject, TweenColor, clearColor, opaqueColor, fadeTime).setOnComplete(a);
+            // Don't fade out if already dark
+            if (fadeImage.color == opaqueColor)
+                a?.Invoke();
+            else
+                LeanTween.value(gameObject, TweenColor, clearColor, opaqueColor, fadeTime).setOnComplete(a);
         }
 
         private void TweenColor(Color c)

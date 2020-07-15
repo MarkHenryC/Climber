@@ -47,12 +47,8 @@ namespace QuiteSensible
 
             levelCreator.CreateLandscapeMesh();
 
-            Debug.LogFormat("Boss panel index is {0}", levelCreator.HighestPanel);
-
-            PositionData pdPlayer = levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
-            PositionData pdBoss = levelCreator.SetObjectAt(boss.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
-
-            Debug.LogFormat("Player at index {0}, Boss at {1}", pdPlayer.landingQuad.startTriangleIndex, pdBoss.landingQuad.startTriangleIndex);
+            levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
+            levelCreator.SetObjectAt(boss.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
 
             int[] emptyIndices = levelCreator.GetEmptyPositions();
             Shuffle(emptyIndices);
@@ -119,7 +115,7 @@ namespace QuiteSensible
 
         private IEnumerator WinGame()
         {
-            float yInc = .1f;
+            float yInc = .01f;
             Vector3 pos = boss.transform.position;
             float seconds = 5f;
             var w = new WaitForEndOfFrame();
