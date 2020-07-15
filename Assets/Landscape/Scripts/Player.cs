@@ -2,23 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace QuiteSensible
 {
     public class Player : MonoBehaviour
     {
         public Image lifeGauge;
+        public TextMeshProUGUI displayText;
+        public GameData gameData;
 
-        // Start is called before the first frame update
         void Start()
+        {
+            if (gameData)
+                gameData.player = this;
+        }
+
+        void Update()
         {
 
         }
 
-        // Update is called once per frame
-        void Update()
+        public void SetText(string text)
         {
-
+            displayText.text = text;
         }
 
         public void SetLife(float unitised)

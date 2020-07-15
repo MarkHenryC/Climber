@@ -7,7 +7,6 @@ namespace QuiteSensible
     {
         public LevelCreator levelCreator;
         public TouchController camController;
-        //public Transform player;
         public float moveSpeed = 3f;
         public float rayCastDistance = 10f;
         public GameObject boss;

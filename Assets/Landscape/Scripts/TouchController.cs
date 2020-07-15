@@ -9,6 +9,7 @@ namespace QuiteSensible
     /// </summary>
     public class TouchController : MonoBehaviour
     {
+        public GameData gameData;
         public Transform target; // usually a camera
         public float yawAngleIncrement = 15f, pitchAngleIncrement = 15f;
         public float pitchMax = 45f, pitchMin = -45f;
@@ -18,40 +19,93 @@ namespace QuiteSensible
 
         private bool cursorVisible;
         private Vector3 targetEuler = Vector3.zero;
+        private int halfScreenWidth, halfScreenHeight;
+        private Vector2 touchDownPos;
+        private Vector2 unitizedFirstTouch = Vector3.zero, unitizedTouchDelta = Vector2.zero;
 
         void Start()
         {
+#if UNITY_EDITOR || UNITY_STANDALONE
             SetCursorVisible(false);
+#endif
+            halfScreenWidth = Screen.width / 2;
+            halfScreenHeight = Screen.height / 2;
         }
 
-        void Update()
+        void FixedUpdate()
         {
 
-#if UNITY_EDITOR
+#if xUNITY_EDITOR || UNITY_STANDALONE
             if (Input.GetKey(KeyCode.Escape))
                 SetCursorVisible(!cursorVisible);
-#endif
 
             if (Input.GetMouseButtonUp(0)) // simulate finger off screen
             {
                 ButtonUp?.Invoke();
             }
+            else if (Input.GetMouseButtonDown(0))
+            {
+                touchDownPos.x = Input.GetAxis("Mouse X");
+                touchDownPos.y = Input.GetAxis("Mouse Y");                
+            }
             else if (Input.GetMouseButton(0))
             {
-                var currentPos = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+                currentDownPos.x = Input.GetAxis("Mouse X");
+                currentDownPos.y = Input.GetAxis("Mouse Y");
+
+                Vector2 deltaPos = currentDownPos - touchDownPos;
                 var currentRot = target.localRotation.eulerAngles;
 
                 if (currentRot.x > 180f) // Adjust to range -min .. +max for clamping. Unity will adjust negatives
                     currentRot.x -= 360f;
 
-                targetEuler.x = Mathf.Clamp(currentRot.x - currentPos.y * pitchAngleIncrement * Time.deltaTime, pitchMin, pitchMax);
-                targetEuler.y = currentRot.y + currentPos.x * yawAngleIncrement * Time.deltaTime;
+                targetEuler.x = Mathf.Clamp(currentRot.x - deltaPos.y * pitchAngleIncrement * Time.deltaTime, pitchMin, pitchMax);
+                targetEuler.y = currentRot.y + deltaPos.x * yawAngleIncrement * Time.deltaTime;
 
                 target.localRotation = Quaternion.Euler(targetEuler);
             }
+#else
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+
+                var currentRot = target.localRotation.eulerAngles;
+
+                if (currentRot.x > 180f) // Adjust to range -min .. +max for clamping. Unity will adjust negatives
+                    currentRot.x -= 360f;
+
+                Vector2 touchDelta = touch.position - touchDownPos;                
+
+                switch (touch.phase)
+                {
+                    case TouchPhase.Stationary:                        
+                        break;
+                    case TouchPhase.Began:
+                        unitizedFirstTouch.x = (touch.position.x - halfScreenWidth) / halfScreenWidth;
+                        unitizedFirstTouch.y = (touch.position.y - halfScreenHeight) / halfScreenHeight;
+                        break;
+                    case TouchPhase.Ended:
+                        unitizedTouchDelta = Vector2.zero;
+                        ButtonUp?.Invoke();
+                        break;
+                    case TouchPhase.Moved:
+                        var unitX = (touch.position.x - halfScreenWidth) / halfScreenWidth;
+                        var unitY = (touch.position.y - halfScreenHeight) / halfScreenHeight;
+                        unitizedTouchDelta.x = unitX - unitizedFirstTouch.x;
+                        unitizedTouchDelta.y = unitY - unitizedFirstTouch.y;
+                        break;
+                }
+                
+                targetEuler.x = Mathf.Clamp(currentRot.x - unitizedTouchDelta.y * pitchAngleIncrement * Time.deltaTime, pitchMin, pitchMax);
+                targetEuler.y = currentRot.y + unitizedTouchDelta.x * yawAngleIncrement * Time.deltaTime;
+
+                gameData.PlayerUiText(string.Format("unitizedTouchDelta.x: {0}, unitizedTouchDelta.y: {1}", unitizedTouchDelta.x, unitizedTouchDelta.y));
+
+                target.localRotation = Quaternion.Euler(targetEuler);
+            }
+#endif
         }
 
-#if UNITY_EDITOR
         /// <summary>
         /// Only appropriate for testing in editor
         /// or if UI added for desktop or WebGL
@@ -66,6 +120,5 @@ namespace QuiteSensible
             else
                 Cursor.lockState = CursorLockMode.Locked;
         }
-#endif
     }
 }
