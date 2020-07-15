@@ -7,7 +7,7 @@ namespace QuiteSensible
     {
         public LevelCreator levelCreator;
         public TouchController camController;
-        public Transform player;
+        //public Transform player;
         public float moveSpeed = 3f;
         public float rayCastDistance = 10f;
         public GameObject boss;
@@ -16,6 +16,7 @@ namespace QuiteSensible
         public GameData gameData;
         public int npcProbability;
         public Fader fader;
+        public Player player;
 
         private Coroutine currentTravelRoutine;
         private Camera cam;
@@ -28,7 +29,8 @@ namespace QuiteSensible
             curve = new ChaikinsPoints();
             camController.ButtonUp = HandleTrigger;
 
-            gameData.StartGameAction = CreateLandscape;
+            gameData.PlayerHealthNotification = (h) => { player.SetLife(h); };
+            gameData.StartGameAction = SetupGame;
             gameData.PlayerDeathNotification = LoseGame;
             gameData.StartGame();
         }
@@ -39,7 +41,7 @@ namespace QuiteSensible
                 positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, rayCastDistance);
         }
 
-        private void CreateLandscape()
+        private void SetupGame()
         {
             fader.FadeIn();
 
@@ -58,6 +60,8 @@ namespace QuiteSensible
                 if (i % npcProbability == 0)
                     levelCreator.CreateObjectAt(templateNPC, PositionData.OccupantType.NPC, emptyIndices[i]);
             }
+
+            player.SetLife(1f); // Maybe should take from gameData but we know it's always going to be 1f unitised at this point
         }
 
         private void HandleTrigger()
@@ -104,6 +108,12 @@ namespace QuiteSensible
                 float incr = 1f / section;
                 while (t < 1f)
                 {
+                    if (!gameData.Playing)
+                    {
+                        currentTravelRoutine = null;
+                        yield break;
+                    }
+
                     player.transform.position = Vector3.Lerp(points[i], points[i + 1], t);
                     t += incr * Time.deltaTime * moveSpeed;
                     yield return wait;

@@ -27,6 +27,8 @@ public class GameData : ScriptableObject
     public void TakePlayerHealth(float deltaTime, float magnitude)
     {
         playerHealth -= deltaTime * magnitude;
+        PlayerHealthNotification?.Invoke(Mathf.Clamp(playerHealth, 0f, startPlayerHealth) / startPlayerHealth);
+
         if (playerHealth <= 0f)
         {
             Debug.Log("Player DEAD");
@@ -80,6 +82,7 @@ public class GameData : ScriptableObject
 
     public System.Action StartGameAction;
     public System.Action PlayerDeathNotification;
+    public System.Action<float> PlayerHealthNotification;
 
     public GameObject GetObject(GameObject template)
     {

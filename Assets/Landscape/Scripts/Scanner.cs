@@ -16,7 +16,9 @@ namespace QuiteSensible
         public float speedVariance = 0f;
         public float distanceVariance = 0f;
         public Transform scanGuide;
+        public GameObject beamMaterialContainer;
         public float uvXAnim = .1f;
+        public float uvXAnimMultiplier = 4f;
 
         private Vector3 scanHalfExtents;
         private float currentAngle;
@@ -26,6 +28,7 @@ namespace QuiteSensible
         private RaycastHit raycastHit;
         private Material beamMaterial;
         private Vector2 uv = Vector2.zero;
+        int rotationDirection = 1;
 
         void Start()
         {
@@ -48,8 +51,9 @@ namespace QuiteSensible
             if (distanceVariance != 0f)
                 scanDistance += Random.Range(-distanceVariance, distanceVariance);
 
-            var r = scanGuide.GetComponent<Renderer>();
-            beamMaterial = r.sharedMaterial;            
+            var r = beamMaterialContainer.GetComponent<Renderer>();
+            beamMaterial = r.sharedMaterial;
+            rotationDirection = Random.Range(0, 2) == 0 ? -1 : 1;
         }
 
         void Update()
@@ -80,21 +84,23 @@ namespace QuiteSensible
                 if (haveTarget)
                 {
                     scanGuide.position = transform.position + currentDirection * raycastHit.distance / 2f;
-                    scanSize.z = raycastHit.distance;
-                    beamMaterial.mainTextureOffset = uv;
-                    uv.y += uvXAnim * Time.deltaTime;
+                    scanSize.z = raycastHit.distance;                    
+                    uv.y += uvXAnim * Time.deltaTime * uvXAnimMultiplier;
                 }
                 else
                 {
                     scanGuide.position = transform.position + currentDirection * scanDistance / 2f;
                     scanSize.z = scanDistance;
+                    uv.y -= uvXAnim * Time.deltaTime;
                 }
+
+                beamMaterial.mainTextureOffset = uv;
 
                 scanGuide.rotation = Quaternion.LookRotation(currentDirection);
                 scanGuide.localScale = scanSize;
 
                 if (!haveTarget)
-                    currentAngle += Time.deltaTime * (360f * rotationsPerSecond);
+                    currentAngle += Time.deltaTime * (360f * rotationsPerSecond * rotationDirection);
             }
             else if (scanGuide.gameObject.activeSelf)
                 scanGuide.gameObject.SetActive(true);
