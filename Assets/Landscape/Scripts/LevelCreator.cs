@@ -194,7 +194,7 @@ namespace QuiteSensible
 
                 if (pd.occupant != PositionData.OccupantType.None)
                 {
-                    Debug.LogWarning("Position NOT empty!");
+                    Debug.LogWarningFormat("Trying to place {0} but position occupied by {1}!", ot, pd.occupant);
                     return false;
                 }
                 GameObject go = gameData.GetObject(template);
