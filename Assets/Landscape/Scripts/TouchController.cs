@@ -22,9 +22,6 @@ namespace QuiteSensible
 
         void Start()
         {
-#if UNITY_EDITOR || UNITY_STANDALONE
-            SetCursorVisible(false);
-#endif
         }
 
         void FixedUpdate()

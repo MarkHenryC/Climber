@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Flames
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    variantMultiplier: 1
+    packables:
+    - {fileID: 21300000, guid: 8796ae28d1542bf4e9ac6adad6901bf3, type: 3}
+    - {fileID: 21300000, guid: c7b907802a218dc4bbd1d4acfcc6a73d, type: 3}
+    - {fileID: 21300000, guid: d80ce1627ad556c4fa4f2a50f127e20d, type: 3}
+    - {fileID: 21300000, guid: 1bd7e92af11c2b54882cb7a0307badf2, type: 3}
+    - {fileID: 21300000, guid: 0f08f25abc768dd43866a5d26c68439e, type: 3}
+    - {fileID: 21300000, guid: e846033f72a2bda4ca4357e9bd63d081, type: 3}
+    totalSpriteSurfaceArea: 1572864
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: c7b907802a218dc4bbd1d4acfcc6a73d, type: 3}
+  - {fileID: 21300000, guid: d80ce1627ad556c4fa4f2a50f127e20d, type: 3}
+  - {fileID: 21300000, guid: 8796ae28d1542bf4e9ac6adad6901bf3, type: 3}
+  - {fileID: 21300000, guid: 1bd7e92af11c2b54882cb7a0307badf2, type: 3}
+  - {fileID: 21300000, guid: 0f08f25abc768dd43866a5d26c68439e, type: 3}
+  - {fileID: 21300000, guid: e846033f72a2bda4ca4357e9bd63d081, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - flames.002
+  - flames.003
+  - flames.001
+  - flames.004
+  - flames.005
+  - flames.006
+  m_Tag: Flames
+  m_IsVariant: 0
