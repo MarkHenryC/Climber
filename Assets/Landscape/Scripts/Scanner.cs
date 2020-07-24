@@ -15,6 +15,7 @@ namespace QuiteSensible
         public float speedVariance = 0f;
         public float distanceVariance = 0f;
         public Transform scanGuide;
+        public Transform rotator;
         public float uvXAnim = .1f;
         public float uvXAnimMultiplier = 4f;
         public ParticleSystem particles;
@@ -87,10 +88,12 @@ namespace QuiteSensible
                 Debug.DrawLine(scanGuide.position, scanGuide.position + scanGuide.forward * scanLength);
 
                 var main = particles.main;
-                main.startLifetime = (scanLength / lengthParticleDivisor);
+
+                main.startLifetime = scanLength / lengthParticleDivisor;
+
                 plasma.SetLength(scanLength / lengthParticleDivisor);
 
-                scanGuide.rotation = Quaternion.LookRotation(currentDirection);
+                rotator.rotation = Quaternion.LookRotation(currentDirection);
 
                 if (!haveTarget && rotate)
                     currentAngle += Time.deltaTime * (360f * rotationsPerSecond * rotationDirection);

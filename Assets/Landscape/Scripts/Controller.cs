@@ -49,7 +49,7 @@ namespace QuiteSensible
             levelCreator.CreateLandscapeMesh();
 
             levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
-            levelCreator.SetObjectAt(boss.transform, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
+            levelCreator.CreateObjectAt(boss, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
 
             int[] emptyIndices = levelCreator.GetEmptyPositions();
             Shuffle(emptyIndices);
