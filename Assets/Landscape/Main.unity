@@ -143,6 +143,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Boss
       objectReference: {fileID: 0}
+    - target: {fileID: 3272919463473202966, guid: 02d293a3a5138d944b7ad932a7f09ff0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3272919463473203178, guid: 02d293a3a5138d944b7ad932a7f09ff0,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1376,7 +1381,7 @@ PrefabInstance:
         type: 3}
       propertyPath: templateNPC
       value: 
-      objectReference: {fileID: 988052652857696523, guid: 8e1c86412f9502547b48ef3561b4d5df,
+      objectReference: {fileID: 3938633069964931506, guid: 8bd41bda829122e439328d8eaef97e1f,
         type: 3}
     - target: {fileID: 7617218296337150061, guid: a85638a7e09ae9b4d9a927d7a0e2700e,
         type: 3}
