@@ -18,6 +18,7 @@ namespace QuiteSensible
         public bool useGradient;
         public LayerMask ourLayer;
         public GameData gameData;
+        public float targetLockTime = 1f;
         [Tooltip("How the tiles spread out from the centre.")]
         public AnimationCurve distanceCurve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 1f)); // default linear       
 
@@ -32,6 +33,7 @@ namespace QuiteSensible
         private Color32[] colorArray;
         private Color32[] colorBuffer;
         private int[] positionIndices;
+        private float lockTargetTimer;
 
         private int highestPointPanelIndex, lowestPointPanelIndex;
         private bool ready;
@@ -58,11 +60,21 @@ namespace QuiteSensible
         /// <param name="distance"></param>
         /// <param name="layer"></param>
         /// <param name="lookForObstruction">If we're about to move to a valid destination, check if there are any obstructions</param>
-        public PositionData Scan(Vector3 startPoint, Vector3 direction, float distance)
+        public PositionData Scan(Vector3 startPoint, Vector3 direction, ref float distance)
         {
             if (!ready)
                 return null;
 
+            // Hold time so target doesn't flicker
+            if (triangleHitIndex >= 0)
+            {
+                lockTargetTimer += Time.deltaTime;
+                if (lockTargetTimer < targetLockTime)
+                {
+                    return GetCurrentTarget();
+                }
+            }
+            
             int newHitIndex = -1;
             PositionData newPosition = null;
 
@@ -70,6 +82,7 @@ namespace QuiteSensible
 
             if (gotHit) // New hit
             {
+                distance = hit.distance;
                 newPosition = FindPositionData(hit.triangleIndex);
                 if (newPosition != null)
                 {
@@ -87,6 +100,8 @@ namespace QuiteSensible
 
                 triangleHitIndex = newHitIndex;
                 UpdateColors();
+
+                lockTargetTimer = 0f;
             }
 
             return newPosition;

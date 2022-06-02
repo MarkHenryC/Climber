@@ -14,8 +14,8 @@ namespace QuiteSensible
 
         void Start()
         {
-            if (gameData)
-                gameData.player = this;
+            //if (gameData)
+            //    gameData.player = this;
         }
 
         void Update()

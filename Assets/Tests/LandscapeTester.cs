@@ -11,7 +11,9 @@ namespace Tests
         [Test]
         public void NewTestScriptSimplePasses()
         {
-            // Use the Assert class to test conditions
+            GameObject landscape = MonoBehaviour.Instantiate(Resources.Load<GameObject>("LandscapePrefab"));
+            QuiteSensible.LevelCreator lc = landscape.GetComponent<QuiteSensible.LevelCreator>();
+            lc.CreateLandscapeMesh();
         }
 
         // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use

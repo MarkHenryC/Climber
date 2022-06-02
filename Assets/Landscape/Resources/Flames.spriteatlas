@@ -28,6 +28,8 @@ SpriteAtlas:
       allowAlphaSplitting: 0
       enableRotation: 1
       enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
     variantMultiplier: 1
     packables:
     - {fileID: 21300000, guid: 8796ae28d1542bf4e9ac6adad6901bf3, type: 3}
@@ -37,6 +39,8 @@ SpriteAtlas:
     - {fileID: 21300000, guid: 0f08f25abc768dd43866a5d26c68439e, type: 3}
     - {fileID: 21300000, guid: e846033f72a2bda4ca4357e9bd63d081, type: 3}
     bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 21300000, guid: c7b907802a218dc4bbd1d4acfcc6a73d, type: 3}
@@ -52,5 +56,6 @@ SpriteAtlas:
   - flames.004
   - flames.005
   - flames.006
+  m_RenderDataMap: {}
   m_Tag: Flames
   m_IsVariant: 0

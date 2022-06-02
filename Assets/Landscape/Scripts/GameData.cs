@@ -8,7 +8,7 @@ namespace QuiteSensible
     public class GameData : ScriptableObject
     {
         public float startPlayerHealth = 100f;
-        public Player player 
+        public PlayerUi player 
         { 
             get { return _player; }
             set { _player = value; } 
@@ -24,7 +24,7 @@ namespace QuiteSensible
 
         private readonly Stack<GameObject> objectsAvailable = new Stack<GameObject>();
         private readonly Stack<GameObject> objectsInUse = new Stack<GameObject>();
-        private Player _player;
+        private PlayerUi _player;
 
         private void Awake()
         {

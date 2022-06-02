@@ -37,7 +37,10 @@ namespace QuiteSensible
         void Update()
         {
             if (gameData.Playing)
-                positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, rayCastDistance);
+            {
+                float scanLength = rayCastDistance;
+                positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, ref scanLength);
+            }
         }
 
         private void SetupGame()
@@ -147,7 +150,8 @@ namespace QuiteSensible
 
         private void PlayScan()
         {
-            positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, rayCastDistance);
+            float scanLength = rayCastDistance;
+            positionOfInterest = levelCreator.Scan(cam.transform.position, cam.transform.forward, ref scanLength);
         }
 
         private void Shuffle(int[] ar)
