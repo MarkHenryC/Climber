@@ -24,6 +24,8 @@ public class Gfx : MonoBehaviour
     {
         mesh = GetComponent<MeshFilter>().mesh;
         origVertices = mesh.vertices;
+
+        Blowup();
     }
 
     void Update()

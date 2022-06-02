@@ -72,17 +72,26 @@ namespace QuiteSensible
                 if (Physics.BoxCast(transform.position, scanHalfExtents, currentDirection,
                     out raycastHit, Quaternion.LookRotation(currentDirection), scanDistance, targetMask))
                 {
-                    if (raycastHit.transform.gameObject.CompareTag("Player"))
+                    //Debug.Log($"Scanner target tag {raycastHit.transform.gameObject.tag}");
+
+                    if (raycastHit.transform.gameObject.CompareTag("Player") ||
+                        raycastHit.transform.gameObject.CompareTag("MainCamera"))
                     {
+                        if (!haveTarget)
+                            Debug.Log($"Scanner target {raycastHit.transform.gameObject.tag} acquired");
+
                         gameData.TakePlayerHealth(Time.deltaTime, damageStrength);
                         haveTarget = true;
                     }
+
                     scanLength = raycastHit.distance;
                     
                 }
                 else if (haveTarget)
                 {                                        
                     haveTarget = false;
+
+                    Debug.Log("Scanner target lost");
                 }
 
                 Debug.DrawLine(scanGuide.position, scanGuide.position + scanGuide.forward * scanLength);

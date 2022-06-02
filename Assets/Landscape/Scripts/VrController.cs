@@ -101,7 +101,7 @@ namespace QuiteSensible
                 switch (pd.occupant)
                 {
                     case PositionData.OccupantType.None:
-                        Debug.LogFormat("Hit empty panel {0}", pd.landingQuad.startTriangleIndex);
+                        //Debug.LogFormat("Hit empty panel {0}", pd.landingQuad.startTriangleIndex);
 
                         if (currentTravelRoutine != null)
                             StopCoroutine(currentTravelRoutine);
