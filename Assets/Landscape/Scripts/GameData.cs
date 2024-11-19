@@ -7,20 +7,22 @@ namespace QuiteSensible
     [CreateAssetMenu()]
     public class GameData : ScriptableObject
     {
-        public float startPlayerHealth = 100f;
+        [SerializeField]
+        float startPlayerHealth = 100f;
+
         public PlayerUi player 
         { 
             get { return _player; }
             set { _player = value; } 
         }
 
-        private float playerHealth;
-        private int wins, losses;
-        public enum EnLevelStatus { Starting, Playing, Finished };
-        public enum EnPlayStatus { None, Won, Lost };
+        private float _playerHealth;
+        private int _wins, _losses;
+        public enum LevelStatus { Starting, Playing, Finished };
+        public enum PlayStatus { None, Won, Lost };
 
-        public EnLevelStatus LevelStatus;
-        public EnPlayStatus PlayStatus;
+        private LevelStatus _levelStatus;
+        private PlayStatus _playStatus;
 
         private readonly Stack<GameObject> objectsAvailable = new Stack<GameObject>();
         private readonly Stack<GameObject> objectsInUse = new Stack<GameObject>();
@@ -28,16 +30,16 @@ namespace QuiteSensible
 
         private void Awake()
         {
-            LevelStatus = EnLevelStatus.Starting;
-            playerHealth = startPlayerHealth;
+            _levelStatus = LevelStatus.Starting;
+            _playerHealth = startPlayerHealth;
         }
 
         public void TakePlayerHealth(float deltaTime, float magnitude)
         {
-            playerHealth -= deltaTime * magnitude;
-            PlayerHealthNotification?.Invoke(Mathf.Clamp(playerHealth, 0f, startPlayerHealth) / startPlayerHealth);
+            _playerHealth -= deltaTime * magnitude;
+            PlayerHealthNotification?.Invoke(Mathf.Clamp(_playerHealth, 0f, startPlayerHealth) / startPlayerHealth);
 
-            if (playerHealth <= 0f)
+            if (_playerHealth <= 0f)
             {
                 Debug.Log("Player DEAD");
 
@@ -53,10 +55,10 @@ namespace QuiteSensible
 
         public void StartGame()
         {
-            playerHealth = startPlayerHealth;
+            _playerHealth = startPlayerHealth;
 
-            PlayStatus = EnPlayStatus.None;
-            LevelStatus = EnLevelStatus.Playing;
+            _playStatus = PlayStatus.None;
+            _levelStatus = LevelStatus.Playing;
 
             StartGameAction?.Invoke();
         }
@@ -65,18 +67,18 @@ namespace QuiteSensible
         {
             Debug.Log("Game WON");
 
-            wins++;
-            LevelStatus = EnLevelStatus.Finished;
-            PlayStatus = EnPlayStatus.Won;
+            _wins++;
+            _levelStatus = LevelStatus.Finished;
+            _playStatus = PlayStatus.Won;
         }
 
         public void LostGame()
         {
             Debug.Log("Game LOST");
 
-            losses++;
-            LevelStatus = EnLevelStatus.Finished;
-            PlayStatus = EnPlayStatus.Lost;
+            _losses++;
+            _levelStatus = LevelStatus.Finished;
+            _playStatus = PlayStatus.Lost;
             PlayerDeathNotification?.Invoke();
         }
 
@@ -84,15 +86,15 @@ namespace QuiteSensible
         {
             get
             {
-                return LevelStatus == EnLevelStatus.Playing &&
-                  PlayStatus == EnPlayStatus.None;
+                return _levelStatus == LevelStatus.Playing &&
+                  _playStatus == PlayStatus.None;
             }
         }
 
-        public float PlayerHealth => playerHealth;
-        public bool PlayerAlive => playerHealth > 0f;
-        public int Wins => wins;
-        public int Losses => losses;
+        public float PlayerHealth => _playerHealth;
+        public bool PlayerAlive => _playerHealth > 0f;
+        public int Wins => _wins;
+        public int Losses => _losses;
 
         public System.Action StartGameAction;
         public System.Action PlayerDeathNotification;

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 namespace QuiteSensible
 {
@@ -9,32 +10,49 @@ namespace QuiteSensible
 
     public class VrController : MonoBehaviour
     {
-        public LevelCreator levelCreator;
-        public float moveSpeed = 3f;
-        public float rayCastDistance = 10f;
-        public GameObject boss;
-        public float curveHeight = 1f;
-        public GameObject templateNPC;
-        public GameData gameData;
-        public int npcProbability;
-        public Fader fader;
-        public PlayerUi player;
-        public PassFloat UpdateScanDistance;
-        public GameObject startMarker, endMarker; // test LH controller pos & angle
+        [SerializeField]
+        private Transform playerTransform;
+        [SerializeField]
+        private LevelCreator levelCreator;
+        [SerializeField]
+        private InputActionReference inputActionRef;
+        [SerializeField]
+        private Transform leftController, rightController;
+        [SerializeField]
+        private float moveSpeed = 3f;
+        [SerializeField]
+        private float rayCastDistance = 10f;
+        [SerializeField]
+        private GameObject boss;
+        [SerializeField]
+        private float curveHeight = 1f;
+        [SerializeField]
+        private GameObject templateNPC;
+        [SerializeField]
+        private GameData gameData;
+        [SerializeField]
+        private int npcProbability;
+        [SerializeField]
+        private Fader fader;        
+        [SerializeField]
+        private PassFloat UpdateScanDistance;
+        [SerializeField]
+        private GameObject startMarker, endMarker; // test LH controller pos & angle
 
         private Coroutine currentTravelRoutine;
         private Camera cam;
         private ChaikinsPoints curve;
         private Vector3 pointerPosition, pointerDirection;
         PositionData positionOfInterest;
+        private PlayerUi playerUi;
 
         void Start()
         {
             cam = Camera.main;
             curve = new ChaikinsPoints();
-            // trigger action = HandleTrigger;
-
-            gameData.PlayerHealthNotification = (h) => { player.SetLife(h); };
+            playerUi = FindObjectOfType<PlayerUi>();
+            inputActionRef.action.performed += InputActionPerformed;
+            gameData.PlayerHealthNotification = (h) => { playerUi.SetLife(h); };
             gameData.StartGameAction = SetupGame;
             gameData.PlayerDeathNotification = LoseGame;
             gameData.StartGame();
@@ -45,13 +63,22 @@ namespace QuiteSensible
             if (gameData.Playing)
             {
                 float scanLength = rayCastDistance;
-                var globalPoint = cam.transform.parent.TransformPoint(pointerPosition);
-                var globalDir = cam.transform.parent.TransformDirection(pointerDirection);
+                var globalPoint = rightController.position; // cam.transform.parent.TransformPoint(pointerPosition);
+                var globalDir = rightController.forward; // cam.transform.parent.TransformDirection(pointerDirection);
                 positionOfInterest = levelCreator.Scan(globalPoint, globalDir, ref scanLength);
                 UpdateScanDistance?.Invoke(globalPoint, globalDir, scanLength);
 
                 startMarker.transform.position = globalPoint;
                 endMarker.transform.position = globalPoint + globalDir * scanLength;
+            }
+        }
+
+
+        void InputActionPerformed(InputAction.CallbackContext ctx)
+        {
+            if (ctx.performed)
+            {
+                HandleTrigger();
             }
         }
 
@@ -63,7 +90,7 @@ namespace QuiteSensible
 
             levelCreator.CreateLandscapeMesh();
 
-            levelCreator.SetObjectAt(player.transform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
+            levelCreator.SetObjectAt(playerTransform, PositionData.OccupantType.Player, levelCreator.LowestPanel);
             levelCreator.CreateObjectAt(boss, PositionData.OccupantType.Boss, levelCreator.HighestPanel);
 
             int[] emptyIndices = levelCreator.GetEmptyPositions();
@@ -75,7 +102,7 @@ namespace QuiteSensible
                     levelCreator.CreateObjectAt(templateNPC, PositionData.OccupantType.NPC, emptyIndices[i]);
             }
 
-            player.SetLife(1f); // Maybe should take from gameData but we know it's always going to be 1f unitised at this point
+            playerUi.SetLife(1f); // Maybe should take from gameData but we know it's always going to be 1f unitised at this point
         }
 
         public void Aim(Vector3 direction)
@@ -106,10 +133,10 @@ namespace QuiteSensible
                         if (currentTravelRoutine != null)
                             StopCoroutine(currentTravelRoutine);
 
-                        Vector3 mid = Vector3.Lerp(player.transform.position, levelCreator.transform.TransformPoint(pd.centrePos), .5f);
-                        Vector3 cross = Vector3.Cross(player.transform.forward, player.transform.right);
+                        Vector3 mid = Vector3.Lerp(playerTransform.position, levelCreator.transform.TransformPoint(pd.centrePos), .5f);
+                        Vector3 cross = Vector3.Cross(playerTransform.forward, playerTransform.right);
                         Vector3 apex = mid + cross * curveHeight;
-                        curve.CalcPoints(new Vector3[] { player.transform.position, apex, levelCreator.transform.TransformPoint(pd.centrePos) });
+                        curve.CalcPoints(new Vector3[] { playerTransform.position, apex, levelCreator.transform.TransformPoint(pd.centrePos) });
                         currentTravelRoutine = StartCoroutine(FollowPath(curve.Points));
 
                         break;
@@ -141,7 +168,7 @@ namespace QuiteSensible
                         yield break;
                     }
 
-                    player.transform.position = Vector3.Lerp(points[i], points[i + 1], t);
+                    playerTransform.position = Vector3.Lerp(points[i], points[i + 1], t);
                     t += incr * Time.deltaTime * moveSpeed;
                     yield return wait;
                 }

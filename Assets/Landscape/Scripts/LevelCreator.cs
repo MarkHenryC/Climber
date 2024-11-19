@@ -213,8 +213,10 @@ namespace QuiteSensible
                     return false;
                 }
                 GameObject go = gameData.GetObject(template);
+                go.transform.SetParent(transform, true);
                 go.transform.position = transform.TransformPoint(pd.centrePos);
                 pd.occupant = ot;
+
                 return true;
             }
             return false;
