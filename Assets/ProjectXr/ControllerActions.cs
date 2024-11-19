@@ -31,7 +31,7 @@ public partial class @ControllerActions: IInputActionCollection2, IDisposable
                     ""name"": ""TriggerPress"",
                     ""type"": ""Button"",
                     ""id"": ""578a0cd6-f388-4fa3-92f3-c09338bdf6fc"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
